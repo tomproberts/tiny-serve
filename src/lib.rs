@@ -1,3 +1,5 @@
+mod parse;
+
 use std::error::Error;
 use tiny_http::{Server, Response, Header};
 use crate::ServeContent::{HtmlContent, RawContent};
@@ -5,29 +7,28 @@ use crate::ServeContent::{HtmlContent, RawContent};
 // Configuration definition
 pub struct ServeConfig {
     content: ServeContent,
-    port: String,
+    port: u16,
 }
 
+pub const DEFAULT_PORT: u16 = 3000;
+impl ServeConfig {
+    pub fn listening_addr(&self) -> String {
+        let mut addr = String::from("0.0.0.0:");
+        addr.push_str(&self.port.to_string());
+        addr
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub enum ServeContent {
     RawContent(String),
     HtmlContent(String),
 }
 
-impl ServeConfig {
-    pub fn build(mut args: impl Iterator<Item=String>) -> Result<ServeConfig, &'static str> {
-        args.next();
-        let port = String::from("0.0.0.0:3000");
-        match args.next() {
-            None => Err("No content"),
-            Some(content) => Ok(ServeConfig { content: RawContent(content), port })
-        }
-    }
-}
-
 // Server main
 pub fn run(config: ServeConfig) -> Result<(), Box<dyn Error>> {
     // Start server
-    let server = Server::http(&config.port).expect("Failed to bind to port");
+    let server = Server::http(config.listening_addr()).expect("Failed to bind to port");
 
     // Listen
     for request in server.incoming_requests() {
