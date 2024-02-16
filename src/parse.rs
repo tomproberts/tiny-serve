@@ -1,5 +1,5 @@
 use crate::{DEFAULT_PORT, ServeConfig};
-use crate::ServeContent::RawContent;
+use crate::ServeContent::{HtmlContent, PageContent, RawContent};
 
 impl ServeConfig {
     pub fn build(mut args: impl Iterator<Item=String>) -> Result<ServeConfig, &'static str> {
@@ -31,7 +31,7 @@ impl ServeConfig {
         }
 
         let content = match are_files {
-            true => RawContent(String::from("no content")),
+            true => PageContent(vec![String::from("chapter1.html")]),
             false => {
                 let strings = contents.join("\n");
 
