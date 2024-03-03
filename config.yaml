@@ -1,0 +1,11 @@
+port: 3000
+files:
+  - route: "/chapter1"
+    file: "./chapter1.html"
+  - route: "/chapter4.html"
+    file: "chapter4.html"
+raw:
+  - route: "/"
+    content: "<h1>content</h1>"
+    type: "text/html"
+    status: 404

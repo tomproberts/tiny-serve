@@ -73,6 +73,7 @@ fn page_closure(pages: Vec<String>) -> ContentClosure {
 pub fn run(config: ServeConfig) -> Result<(), Box<dyn Error>> {
     // Start server
     let server = Server::http(config.listening_addr()).expect("Failed to bind to port");
+    println!("Started server on {}!", config.listening_addr());
 
     // Closure
     let closure = match config.content {
@@ -82,6 +83,7 @@ pub fn run(config: ServeConfig) -> Result<(), Box<dyn Error>> {
     };
 
     // Listen
+    println!("Listening for requests...");
     for request in server.incoming_requests() {
         // Run callback
         let response = closure(request.url());

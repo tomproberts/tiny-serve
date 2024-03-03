@@ -76,7 +76,7 @@ impl ServeConfig {
                             Err(_) => Err("Could not find config file")
                         }
                     }
-                    None => Err("No port specified.")
+                    None => Err("No config file specified.")
                 };
             } else {
                 contents.push(arg)
