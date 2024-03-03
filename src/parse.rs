@@ -28,7 +28,10 @@ struct RoutedRawContent {
 
 impl ExternalConfig {
     pub fn to_serve_config(&self) -> ServeConfig {
-        ServeConfig { content: RawContent(String::from("content")), port: self.port.unwrap_or(DEFAULT_PORT) }
+        ServeConfig {
+            content: RawContent(String::from("Unimplemented!")),
+            port: self.port.unwrap_or(DEFAULT_PORT),
+        }
     }
 }
 
@@ -189,10 +192,35 @@ mod tests {
             content_type: Some(String::from("text/html")),
             status: Some(200),
         }, raw[0]);
+    }
 
-        let config = &parsed.to_serve_config();
+    #[test]
+    fn transform_config_to_serve_config() {
+        let external = ExternalConfig {
+            port: None,
+            files: Some(vec![
+                RoutedFile {
+                    route: String::from("/chapter1"),
+                    file: String::from("./chapter1.html"),
+                    content_type: None,
+                }, RoutedFile {
+                    route: String::from("/chapter4.html"),
+                    file: String::from("chapter4.html"),
+                    content_type: None,
+                },
+            ]),
+            raw: Some(vec![
+                RoutedRawContent {
+                    route: String::from("/"),
+                    content: String::from("<h1>content</h1>"),
+                    content_type: Some(String::from("text/html")),
+                    status: None,
+                },
+            ]),
+        };
 
-        assert_eq!(4500, config.port);
-        assert_eq!(RawContent(String::from("content")), config.content);
+        let config = external.to_serve_config();
+        assert_eq!(DEFAULT_PORT, config.port);
+        // TODO: extend test
     }
 }
