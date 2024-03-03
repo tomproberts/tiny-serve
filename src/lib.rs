@@ -9,7 +9,6 @@ use crate::ServeContent::{PageContent, HtmlContent, RawContent};
 pub struct ServeConfig {
     content: ServeContent,
     port: u16,
-    serve_files: bool,
 }
 
 pub const DEFAULT_PORT: u16 = 3000;
@@ -19,6 +18,12 @@ impl ServeConfig {
         let mut addr = String::from("0.0.0.0:");
         addr.push_str(&self.port.to_string());
         addr
+    }
+    pub fn is_serving_files(&self) -> bool {
+        match self.content {
+            PageContent(_) => true,
+            _ => false,
+        }
     }
 }
 
