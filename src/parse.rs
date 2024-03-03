@@ -1,13 +1,13 @@
 use crate::{DEFAULT_PORT, ServeConfig};
-use crate::ServeContent::{HtmlContent, PageContent, RawContent};
+use crate::ServeContent::{PageContent, RawContent};
 
 impl ServeConfig {
     pub fn build(mut args: impl Iterator<Item=String>) -> Result<ServeConfig, &'static str> {
         args.next(); // skip "tiny-serve"
 
-        let mut contents: Vec<String> = Vec::new();
+        let mut contents: Vec<String> = vec![];
         let mut port = DEFAULT_PORT;
-        let are_files = false;
+        let mut serve_files = false;
 
         while let Some(arg) = args.next() {
             if arg == "-p" {
@@ -21,6 +21,9 @@ impl ServeConfig {
                     }
                     None => return Err("No port specified.")
                 }
+            } else if arg == "-f" {
+                // All values should be files
+                serve_files = true
             } else {
                 contents.push(arg)
             }
@@ -30,16 +33,14 @@ impl ServeConfig {
             return Err("Usage: tiny-serve [-p <PORT>] [-f] <content|filename>...");
         }
 
-        let content = match are_files {
-            true => PageContent(vec![String::from("chapter1.html")]),
-            false => {
+        let content = {
+            if serve_files { PageContent(contents) } else {
                 let strings = contents.join("\n");
-
                 RawContent(strings)
             }
         };
 
-        Ok(ServeConfig { content, port })
+        Ok(ServeConfig { content, port, serve_files })
     }
 }
 
@@ -75,5 +76,24 @@ mod tests {
 
         assert_eq!(2700, config.port);
         assert_eq!(RawContent(String::from("initial content")), config.content);
+    }
+
+    #[test]
+    fn parse_files() {
+        let args = to_args!["-f", "chapter1.html"];
+        let config = ServeConfig::build(args).unwrap();
+
+        assert!(config.serve_files, "should be serving files when using -f option");
+        assert_eq!(PageContent(vec![String::from("chapter1.html")]), config.content);
+        assert_eq!(DEFAULT_PORT, config.port);
+
+        let args = to_args!["chapter1.html", "chapter2.html", "-f"];
+        let config = ServeConfig::build(args).unwrap();
+
+        assert!(config.serve_files, "should be serving files when using -f option");
+        assert_eq!(PageContent(
+            vec![String::from("chapter1.html"), String::from("chapter2.html")]
+        ), config.content);
+        assert_eq!(DEFAULT_PORT, config.port);
     }
 }
